@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Trend & Skill Data Collection Service
+
+Parameters:
+  SupabaseUrl:
+    Type: String
+  SupabaseKey:
+    Type: String
+  SupabaseServiceRoleKey:
+    Type: String
+  SerpApiKey:
+    Type: String
+  ApifyApiToken:
+    Type: String
+  HostUrl:
+    Type: String
+    Default: ""
+
+Globals:
+  Function:
+    Timeout: 300  # 5 minutes for batch operations
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        SUPABASE_URL: !Ref SupabaseUrl
+        SUPABASE_KEY: !Ref SupabaseKey
+        SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
+        SERP_API_KEY: !Ref SerpApiKey
+        APIFY_API_TOKEN: !Ref ApifyApiToken
+        HOST_URL: !Ref HostUrl
+
+Resources:
+  TrendSkillServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.main.handler
+      CodeUri: .
+      Description: Trend & Skill Data Collection Service
+      Architectures:
+        - x86_64
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        Root:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+
+Outputs:
+  TrendSkillServiceApi:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  TrendSkillServiceFunction:
+    Description: Lambda Function ARN
+    Value: !GetAtt TrendSkillServiceFunction.Arn
