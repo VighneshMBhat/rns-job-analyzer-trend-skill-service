@@ -5,14 +5,26 @@ Description: Trend & Skill Data Collection Service
 Parameters:
   SupabaseUrl:
     Type: String
+    Description: Supabase URL
   SupabaseKey:
     Type: String
+    Description: Supabase Anon Key
+    NoEcho: true
   SupabaseServiceRoleKey:
     Type: String
+    Description: Supabase Service Role Key
+    NoEcho: true
+  # Optional - fetched from database via Admin Portal
   SerpApiKey:
     Type: String
+    Description: SERP API Key (optional - fetched from database)
+    NoEcho: true
+    Default: ""
   ApifyApiToken:
     Type: String
+    Description: Apify API Token (optional - fetched from database)
+    NoEcho: true
+    Default: ""
   HostUrl:
     Type: String
     Default: ""
@@ -27,6 +39,7 @@ Globals:
         SUPABASE_URL: !Ref SupabaseUrl
         SUPABASE_KEY: !Ref SupabaseKey
         SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
+        # Dynamic keys fetched from database, these are fallbacks
         SERP_API_KEY: !Ref SerpApiKey
         APIFY_API_TOKEN: !Ref ApifyApiToken
         HOST_URL: !Ref HostUrl
