@@ -1,5 +1,9 @@
 """
 Key Service - Fetches API keys from Supabase admin_api_keys table
+
+Only manages rate-limited API keys:
+- SERP_API_KEY (for Google Jobs fetching)
+- APIFY_API_TOKEN (for Reddit scraping)
 """
 import requests
 from datetime import datetime, timedelta
@@ -58,12 +62,12 @@ def get_api_key(service_name: str, key_name: str, fallback: str = None) -> str:
 
 
 def get_serp_key(fallback: str = None) -> str:
-    """Get SERP API key."""
+    """Get SERP API key (rate-limited, managed via Admin Portal)."""
     return get_api_key("serp", "SERP_API_KEY", fallback)
 
 
 def get_apify_key(fallback: str = None) -> str:
-    """Get Apify API token."""
+    """Get Apify API token (rate-limited, managed via Admin Portal)."""
     return get_api_key("apify", "APIFY_API_TOKEN", fallback)
 
 
