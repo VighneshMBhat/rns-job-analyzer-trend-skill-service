@@ -7,12 +7,21 @@ import requests
 import hashlib
 from datetime import datetime, timezone
 from app.core.config import settings
+from app.services.key_service import get_apify_key
 
 
 def generate_post_hash(title: str, subreddit: str, created_time: str) -> str:
     """Generate unique hash for post deduplication."""
     key = f"{title}|{subreddit}|{created_time}".lower().strip()
     return hashlib.md5(key.encode()).hexdigest()
+
+
+def _get_apify_api_token() -> str:
+    """Get Apify API token (database first, then env fallback)."""
+    api_token = get_apify_key(fallback=settings.APIFY_API_TOKEN)
+    if not api_token or api_token == "your_apify_api_token_here":
+        raise ValueError("APIFY_API_TOKEN not configured. Add it via Admin Portal or get one from https://apify.com/")
+    return api_token
 
 
 def fetch_reddit_discussions(
@@ -33,8 +42,7 @@ def fetch_reddit_discussions(
     Returns:
         List of normalized discussion records
     """
-    if not settings.APIFY_API_TOKEN or settings.APIFY_API_TOKEN == "your_apify_api_token_here":
-        raise ValueError("APIFY_API_TOKEN not configured. Get one from https://apify.com/")
+    api_token = _get_apify_api_token()
     
     # Use the official Apify Reddit Scraper actor
     # Actor: apify/reddit-scraper (official and free)
@@ -70,7 +78,7 @@ def fetch_reddit_discussions(
     
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {settings.APIFY_API_TOKEN}"
+        "Authorization": f"Bearer {api_token}"
     }
     
     try:
@@ -166,9 +174,10 @@ def fetch_from_subreddits(
     
     run_url = f"https://api.apify.com/v2/acts/{actor_id}/run-sync-get-dataset-items"
     
+    api_token = _get_apify_api_token()
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {settings.APIFY_API_TOKEN}"
+        "Authorization": f"Bearer {api_token}"
     }
     
     try:

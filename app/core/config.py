@@ -3,16 +3,16 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    # Supabase
+    # Supabase (required)
     SUPABASE_URL: str
     SUPABASE_KEY: str
     SUPABASE_SERVICE_ROLE_KEY: str
     
-    # SERP API (for job listings)
-    SERP_API_KEY: str
+    # SERP API (optional - can be fetched from database)
+    SERP_API_KEY: str = ""
     
-    # Apify (for Reddit scraping)
-    APIFY_API_TOKEN: str
+    # Apify (optional - can be fetched from database)
+    APIFY_API_TOKEN: str = ""
     
     # Service Config
     HOST_URL: str = "http://localhost:8002"

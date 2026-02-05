@@ -5,12 +5,21 @@ import requests
 import hashlib
 from datetime import datetime, timezone
 from app.core.config import settings
+from app.services.key_service import get_serp_key
 
 
 def generate_job_hash(title: str, company: str, location: str) -> str:
     """Generate unique hash for job deduplication."""
     key = f"{title}|{company}|{location}".lower().strip()
     return hashlib.md5(key.encode()).hexdigest()
+
+
+def _get_serp_api_key() -> str:
+    """Get SERP API key (database first, then env fallback)."""
+    api_key = get_serp_key(fallback=settings.SERP_API_KEY)
+    if not api_key or api_key == "your_serp_api_key_here":
+        raise ValueError("SERP_API_KEY not configured. Add it via Admin Portal or get one from https://serpapi.com/")
+    return api_key
 
 
 def fetch_jobs_from_serp(
@@ -29,8 +38,7 @@ def fetch_jobs_from_serp(
     Returns:
         List of normalized job records
     """
-    if not settings.SERP_API_KEY or settings.SERP_API_KEY == "your_serp_api_key_here":
-        raise ValueError("SERP_API_KEY not configured. Get one from https://serpapi.com/")
+    api_key = _get_serp_api_key()
     
     url = "https://serpapi.com/search.json"
     params = {
@@ -39,7 +47,7 @@ def fetch_jobs_from_serp(
         "location": location,
         "hl": settings.DEFAULT_LANGUAGE,
         "gl": settings.DEFAULT_REGION,
-        "api_key": settings.SERP_API_KEY,
+        "api_key": api_key,
         "num": num_results
     }
     
